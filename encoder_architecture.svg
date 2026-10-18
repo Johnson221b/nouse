@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1510" viewBox="0 0 1800 1510" role="img" aria-labelledby="title desc">
+  <title id="title">456 final shared 3D graph encoder architecture</title>
+  <desc id="desc">A shared sequence, geometry, numeric and three-dimensional molecular graph encoder produces a 256-dimensional representation, followed by training-only auxiliary heads and 29 task-specific regression heads.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#52606d"/>
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#102a43" flood-opacity="0.14"/>
+    </filter>
+    <style>
+      .title { font: 600 32px Arial, 'Noto Sans CJK SC', sans-serif; fill: #102a43; }
+      .subtitle { font: 400 17px Arial, 'Noto Sans CJK SC', sans-serif; fill: #52606d; }
+      .section { font: 600 22px Arial, 'Noto Sans CJK SC', sans-serif; fill: #102a43; }
+      .box-title { font: 600 18px Arial, 'Noto Sans CJK SC', sans-serif; fill: #102a43; }
+      .box-text { font: 400 16px Arial, 'Noto Sans CJK SC', sans-serif; fill: #243b53; }
+      .small { font: 400 14px Arial, 'Noto Sans CJK SC', sans-serif; fill: #52606d; }
+      .arrow { stroke: #52606d; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .group { stroke-width: 2; rx: 18; }
+      .box { stroke-width: 1.8; rx: 12; filter: url(#shadow); }
+    </style>
+  </defs>
+
+  <rect width="1800" height="1510" fill="#ffffff"/>
+  <text class="title" x="60" y="55">456 最终 Encoder：三维分子图 + 辅助监督</text>
+  <text class="subtitle" x="60" y="87">G1_graph_aux_s20000 · 一个共享 Encoder · 256 维表示 · 29 个任务头</text>
+
+  <!-- Input -->
+  <rect class="group" x="50" y="115" width="1700" height="150" fill="#f1f6ff" stroke="#7aa2d4"/>
+  <text class="section" x="75" y="148">输入：单个分子样本</text>
+  <rect class="box" x="75" y="170" width="365" height="72" fill="#e8f1ff" stroke="#3b6ea8"/>
+  <text class="box-title" x="95" y="198">结构 token</text>
+  <text class="box-text" x="95" y="224">最多 256 个 token ID</text>
+  <rect class="box" x="470" y="170" width="365" height="72" fill="#e8f1ff" stroke="#3b6ea8"/>
+  <text class="box-title" x="490" y="198">几何与数值</text>
+  <text class="box-text" x="490" y="224">几何 96 维 · 数值 32 维</text>
+  <rect class="box" x="860" y="170" width="365" height="72" fill="#fff3df" stroke="#b97818"/>
+  <text class="box-title" x="880" y="198">原子与化学键</text>
+  <text class="box-text" x="880" y="224">8 个原子字段 · 4 个键字段</text>
+  <rect class="box" x="1250" y="170" width="465" height="72" fill="#fff3df" stroke="#b97818"/>
+  <text class="box-title" x="1270" y="198">三维坐标与图连接</text>
+  <text class="box-text" x="1270" y="224">共价边 + 5 Å 内空间邻居（最多 24 个）</text>
+
+  <!-- Input routes into the two encoder branches -->
+  <path class="arrow" d="M258 265 L258 305"/>
+  <path class="arrow" d="M652 265 L652 305"/>
+  <path class="arrow" d="M1042 265 L1042 305"/>
+  <path class="arrow" d="M1482 265 L1482 305"/>
+
+  <!-- Backbone -->
+  <rect class="group" x="50" y="305" width="810" height="515" fill="#f3fbf3" stroke="#6cad74"/>
+  <text class="section" x="75" y="342">SharedEncoder：序列 / 几何 / 数值骨干</text>
+  <rect class="box" x="80" y="370" width="330" height="82" fill="#eef8ee" stroke="#3c8c4a"/>
+  <text class="box-title" x="100" y="401">Token 路径</text>
+  <text class="box-text" x="100" y="427">Embedding 8192→128 + 位置编码</text>
+  <rect class="box" x="485" y="370" width="330" height="82" fill="#eef8ee" stroke="#3c8c4a"/>
+  <text class="box-title" x="505" y="401">序列特征提取</text>
+  <text class="box-text" x="505" y="427">2×残差 Conv1d，kernel=5</text>
+  <path class="arrow" d="M410 411 L485 411"/>
+  <rect class="box" x="80" y="490" width="330" height="82" fill="#eef8ee" stroke="#3c8c4a"/>
+  <text class="box-title" x="100" y="521">几何 MLP</text>
+  <text class="box-text" x="100" y="547">96→128→128</text>
+  <rect class="box" x="485" y="490" width="330" height="82" fill="#eef8ee" stroke="#3c8c4a"/>
+  <text class="box-title" x="505" y="521">数值 MLP</text>
+  <text class="box-text" x="505" y="547">32→64→64</text>
+  <rect class="box" x="240" y="625" width="440" height="82" fill="#eef8ee" stroke="#3c8c4a"/>
+  <text class="box-title" x="260" y="656">Mean + Max 池化并拼接</text>
+  <text class="box-text" x="260" y="682">256 + 128 + 64 = 448 维</text>
+  <path class="arrow" d="M650 452 L650 580 L460 580 L460 625"/>
+  <path class="arrow" d="M245 572 L245 600 L390 600 L390 625"/>
+  <path class="arrow" d="M650 572 L650 600 L530 600 L530 625"/>
+  <rect class="box" x="180" y="742" width="560" height="55" fill="#dff2e2" stroke="#3c8c4a"/>
+  <text class="box-title" x="245" y="777">z_base：448→256 · LayerNorm + GELU + Dropout</text>
+  <path class="arrow" d="M460 707 L460 742"/>
+
+  <!-- Graph -->
+  <rect class="group" x="900" y="305" width="850" height="515" fill="#fff8ec" stroke="#d39b42"/>
+  <text class="section" x="925" y="342">三维分子图分支</text>
+  <rect class="box" x="930" y="370" width="360" height="82" fill="#fff3df" stroke="#b97818"/>
+  <text class="box-title" x="950" y="401">节点表示</text>
+  <text class="box-text" x="950" y="427">8 个原子 Embedding，各 128 维求和</text>
+  <rect class="box" x="1360" y="370" width="360" height="82" fill="#fff3df" stroke="#b97818"/>
+  <text class="box-title" x="1380" y="401">边表示</text>
+  <text class="box-text" x="1380" y="427">4 个键 Embedding + 距离 RBF 32</text>
+  <rect class="box" x="930" y="490" width="790" height="82" fill="#fff3df" stroke="#b97818"/>
+  <text class="box-title" x="950" y="521">边集合与消息传递</text>
+  <text class="box-text" x="950" y="547">共价边双向化 + 空间邻居；4× MessageBlock，隐藏维度 128</text>
+  <path class="arrow" d="M1110 452 L1110 490"/>
+  <path class="arrow" d="M1540 452 L1540 490"/>
+  <rect class="box" x="1050" y="625" width="550" height="82" fill="#fff3df" stroke="#b97818"/>
+  <text class="box-title" x="1070" y="656">图级池化</text>
+  <text class="box-text" x="1070" y="682">sum/√N + mean + max + 8 向量通道 + 3 个标量 = 395 维</text>
+  <path class="arrow" d="M1325 572 L1325 625"/>
+  <rect class="box" x="1070" y="742" width="510" height="55" fill="#ffedcf" stroke="#b97818"/>
+  <text class="box-title" x="1120" y="777">z_graph：395→256→256 · GELU</text>
+  <path class="arrow" d="M1325 707 L1325 742"/>
+
+  <!-- Fusion -->
+  <path class="arrow" d="M460 797 L460 862"/>
+  <path class="arrow" d="M1325 797 L1325 862"/>
+  <rect class="group" x="260" y="850" width="1280" height="145" fill="#f5efff" stroke="#8c69bc"/>
+  <text class="section" x="290" y="885">门控残差融合</text>
+  <rect class="box" x="290" y="905" width="1220" height="65" fill="#eee4ff" stroke="#7650a8"/>
+  <text class="box-title" x="370" y="933">LayerNorm(z_base + sigmoid(gate) × z_graph)</text>
+  <text class="box-text" x="370" y="957">gate 初值 = −2，sigmoid ≈ 0.119；输出共享表示 z ∈ R²⁵⁶</text>
+
+  <!-- Training and inference heads -->
+  <path class="arrow" d="M900 995 L900 1045"/>
+  <rect class="group" x="50" y="1035" width="760" height="255" fill="#fff1f4" stroke="#ca6681"/>
+  <text class="section" x="75" y="1072">仅训练阶段：辅助监督</text>
+  <rect class="box" x="85" y="1100" width="300" height="92" fill="#ffe9ee" stroke="#b34b68"/>
+  <text class="box-title" x="105" y="1131">QMugs 辅助头</text>
+  <text class="box-text" x="105" y="1157">256→18 个目标</text>
+  <text class="small" x="105" y="1180">参与辅助损失</text>
+  <rect class="box" x="470" y="1100" width="300" height="92" fill="#ffe9ee" stroke="#b34b68"/>
+  <text class="box-title" x="490" y="1131">QM9 辅助头</text>
+  <text class="box-text" x="490" y="1157">256→8 个目标</text>
+  <text class="small" x="490" y="1180">参与辅助损失</text>
+  <path class="arrow" d="M410 1010 L410 1100"/>
+  <path class="arrow" d="M410 1050 L620 1100"/>
+  <text class="small" x="240" y="1250">辅助损失权重 = 0.2；推理时不读取辅助标签</text>
+
+  <rect class="group" x="850" y="1035" width="900" height="255" fill="#edf9f9" stroke="#4aa3a3"/>
+  <text class="section" x="875" y="1072">推理阶段：29 个任务专用回归头</text>
+  <rect class="box" x="885" y="1100" width="830" height="82" fill="#e9f7f7" stroke="#258b8b"/>
+  <text class="box-title" x="910" y="1131">每个任务独立选择 Linear 256→1 或 MLP 256→192/384→GELU→1</text>
+  <text class="box-text" x="910" y="1157">6 个线性头 · 4 个宽度 192 · 19 个宽度 384</text>
+  <path class="arrow" d="M1300 995 L1300 1100"/>
+  <rect class="box" x="885" y="1200" width="250" height="62" fill="#dff5f5" stroke="#258b8b"/>
+  <text class="box-title" x="915" y="1230">QMugs</text>
+  <text class="box-text" x="915" y="1252">5 个子任务</text>
+  <rect class="box" x="1175" y="1200" width="250" height="62" fill="#dff5f5" stroke="#258b8b"/>
+  <text class="box-title" x="1205" y="1230">QM9</text>
+  <text class="box-text" x="1205" y="1252">4 个子任务</text>
+  <rect class="box" x="1465" y="1200" width="250" height="62" fill="#dff5f5" stroke="#258b8b"/>
+  <text class="box-title" x="1495" y="1230">PolyGraphMT</text>
+  <text class="box-text" x="1495" y="1252">20 个子任务</text>
+  <path class="arrow" d="M1300 1182 L1010 1200"/>
+  <path class="arrow" d="M1300 1182 L1300 1200"/>
+  <path class="arrow" d="M1300 1182 L1590 1200"/>
+
+  <text class="subtitle" x="60" y="1380">最终共享图 Encoder：1,931,657 参数 · 4 层消息传递 · 输出 256 维 · 图 batch 128 · 节点预算 8,192</text>
+  <text class="small" x="60" y="1412">实现对应：models_v2.py（GraphEncoder / MessageBlock / SharedEncoder）与 train_v2.py</text>
+  <text class="small" x="60" y="1440">图示中的辅助头只在训练中提供额外监督；正式预测只使用结构、几何、数值和图输入。</text>
+</svg>
