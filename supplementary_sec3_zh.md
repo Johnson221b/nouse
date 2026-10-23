@@ -1,155 +1,291 @@
-# 补充材料 3：空间耦合指标 S、C 的推导与证明
+# 补充材料 3（修订版）：空间耦合指标 $S$、$C$ 的严格性质
 
-本节给出正文 §1 中两个空间耦合指标的严格数学推导、上下界证明，以及完全随机情形下的期望值，并附蒙特卡洛数值验证。
+本节给出两个指标的精确线性代数性质、可达到的上下界和一个明确的零模型。需要先区分两件事：$S$ 是“经过一步邻域平均后保留下来的流矩阵能量比例”，$C$ 是“流入场与邻域流出场的标准化交叉积”。只有在额外的图矩阵条件下，它们才可以直接解释成通常意义的空间有序度和相关系数。
 
-## 3.1 定义与记号
+## 修订说明（标记 R1--R6）
 
-设研究区由 $N$ 个空间单元（CBG 或出租车分区）组成，其地理邻接关系构成图 $G$。定义行标准化 Queen 邻接权重矩阵 $W \in \mathbb{R}^{N \times N}$：
+以下编号对应正文中的修订位置；GitHub 的提交差异还会逐行显示所有改动。
+
+| 标记 | 位置 | 修订内容 |
+|---|---|---|
+| **R1** | §3.1 | 补充孤立节点、零分母和均匀边际场的可定义性条件。 |
+| **R2** | §3.2 | 将 $S$ 的解释改为“一步邻域平滑能量保留率”，补充奇异模态展开，并说明高频交替模式的反例。 |
+| **R3** | §3.3 | 将 $S$ 的下界改为 $\sigma_{\min}^2(W)$，说明上下界的可达到性及非双随机时 $S$ 可能大于 $1$。 |
+| **R4** | §3.4 | 将 $C$ 的精确界改为 $\|PWP\|_2$，说明行标准化图上 $C$ 可能大于 $1$，并补充边际场限制。 |
+| **R5** | §3.5 | 修正零模型假设，给出交换对称零模型下的 $\mathbb E_0[S]$ 和 $\mathbb E_0[C]$ 证明。 |
+| **R6** | §3.6 | 重写“有序性”和“耦合紧密性”的可证明表述，并给出报告建议。 |
+| **R7** | §3.7 | 按修订后的交换对称零模型重新表述蒙特卡洛验证，并使用有限 $N$ 的精确基线。 |
+
+## 3.1 定义、可定义性和记号【修订 R1】
+
+设 $N\ge 2$，每个空间单元至少有一个邻居（$k_i>0$）。令
 
 $$
-W_{ij} =
-\begin{cases}
-\frac{1}{k_i}, & j \in \mathcal{N}(i),\\[4pt]
-0, & \text{否则},
+W_{ij}=\begin{cases}
+1/k_i,&j\in\mathcal N(i),\\
+0,&\text{否则},
 \end{cases}
+\qquad W\mathbf 1=\mathbf 1 .
 $$
 
-其中 $\mathcal{N}(i)$ 为单元 $i$ 的地理邻接集合，$k_i = |\mathcal{N}(i)|$ 为单元 $i$ 的度（邻接单元数）。由此 $W$ 行随机，即 $W\mathbf{1} = \mathbf{1}$，但一般**不**双随机。
-
-设 $F \in \mathbb{R}_{\ge 0}^{N \times N}$ 为逐日 OD 流矩阵（$F_{ij}$ 为从 $i$ 到 $j$ 的流量）。将其归一化为流分布
+若存在孤立单元，需要先删除它们，或给 $W$ 加自环；否则行标准化本身没有定义。设 $F\ge0$ 且 $\sum_{ij}F_{ij}>0$，定义
 
 $$
-F_n = \frac{F}{\sum_{i,j} F_{ij}}, \qquad \sum_{i,j} (F_n)_{ij} = 1,
+F_n=\frac{F}{\sum_{ij}F_{ij}},\qquad
+U=\frac1{N^2}\mathbf1\mathbf1^\top,qquad
+H=F_c=F_n-U .
 $$
 
-并中心化（去除全局均匀基线）
+于是 $\sum_{ij}H_{ij}=0$。若 $H=0$，$S$ 的分母为零，此日的 $S$ 应记为缺失；不能把它代入下面的商。再令
 
 $$
-F_c = F_n - \tfrac{1}{N^2}\mathbf{1}\mathbf{1}^\top, \qquad \sum_{i,j} (F_c)_{ij} = 0 .
+p_{\rm out}=F_n\mathbf1,qquad p_{\rm in}=F_n^\top\mathbf1 .
 $$
 
-记流入与流出占比向量
+对非恒定向量 $p$ 定义
 
 $$
-p_{\text{out}} = F_n \mathbf{1}, \qquad p_{\text{in}} = F_n^\top \mathbf{1},
+z(p)=\frac{p-\bar p\mathbf1}{s_p},qquad
+s_p^2=\frac1N\sum_i(p_i-\bar p)^2,
 $$
 
-其中 $(p_{\text{out}})_i$ 为从单元 $i$ 出发的流量占比，$(p_{\text{in}})_i$ 为到达单元 $i$ 的流量占比。对任意向量 $v$，定义 z-score 标准化 $z(v) = \frac{v - \bar{v}}{s}$，其中 $\bar{v} = \frac{1}{N}\sum_i v_i$，$s^2 = \frac{1}{N}\sum_i (v_i - \bar{v})^2$；于是 $\|z(v)\|_2^2 = N$。
+所以 $\mathbf1^\top z(p)=0$ 且 $\|z(p)\|_2^2=N$。若 $p_{\rm in}$ 或 $p_{\rm out}$ 恰好均匀，则 $C$ 的 z-score 不定义，应记为缺失，或事先约定该日 $C=0$。
 
-正文中的两个空间耦合指标（即逐日流矩阵的 Moran 型指标）定义为：
+指标仍定义为
 
 $$
-S = \frac{\|W F_c\|_F^2}{\|F_c\|_F^2} \qquad \text{（流级结构稳定性）},
+S=\frac{\|WH\|_F^2}{\|H\|_F^2},
 \qquad
-C = \frac{z(p_{\text{in}})^\top W\, z(p_{\text{out}})}{N} \qquad \text{（交叉流向耦合强度）},
+C=\frac{z(p_{\rm in})^\top Wz(p_{\rm out})}{N} .
 $$
 
-其中 $\|\cdot\|_F$ 为 Frobenius 范数。
+## 3.2 $S$ 的确切含义【修订 R2】
 
-## 3.2 构造动机
-
-**S 的构造。** 记 $v = \text{vec}(F_c) \in \mathbb{R}^{N^2}$ 为 $F_c$ 的按列堆叠向量。由 Kronecker 乘积恒等式 $\text{vec}(W F_c) = (I_N \otimes W)\, v$，S 可改写为 Rayleigh 商
+记 $h_j=H_{:j}$ 为 $H$ 的第 $j$ 列。则
 
 $$
-S = \frac{v^\top (I_N \otimes W^\top W)\, v}{v^\top v}.
+S=\frac{\sum_{j=1}^N h_j^\top W^\top W h_j}
+        {\sum_{j=1}^N h_j^\top h_j} .
 $$
 
-矩阵 $W^\top W$ 半正定，故 $I_N \otimes W^\top W$ 半正定。$(W F_c)$ 的第 $i$ 行是单元 $i$ 各邻居流出占比的算术平均，因此 $\|W F_c\|_F^2$ 度量的是「经过一步地理平滑后的流矩阵能量」：若相邻单元的流出剖面彼此相似，平滑几乎不损失能量，S 接近其上界；若流在空间上完全无序，平滑会大幅抵消能量，S 接近其下界。因此 S 本质上是流矩阵在其空间低频子空间（沿图平滑方向）中的能量占比，即流级空间自相关强度。
-
-**C 的构造。** C 是流入场 $p_{\text{in}}$ 与流出场 $p_{\text{out}}$ 之间的双变量 Moran's I：分子 $z(p_{\text{in}})^\top W z(p_{\text{out}})$ 度量「高流入单元的邻居是否同时高流出」。当流入与流出在空间上同向耦合（高流入区邻近高流出区）时 C 为正，反向耦合时为负，彼此独立时趋近于 0。
-
-## 3.3 上下界
-
-**命题 1（S 的上下界）。** 设 $\sigma_{\max}(W)$ 为 $W$ 的最大奇异值，则
+若 $W=U_W\Sigma V_W^\top$，右奇异向量为 $v_r$、奇异值为 $\sigma_r$，令
+$a_{rj}=v_r^\top h_j$，则
 
 $$
-0 \le S \le \sigma_{\max}^2(W).
+S=\frac{\displaystyle\sum_{r=1}^N\sigma_r^2
+                    \sum_{j=1}^N a_{rj}^2}
+        {\displaystyle\sum_{r=1}^N\sum_{j=1}^N a_{rj}^2} .
 $$
 
-*证明。* 因 $W^\top W$ 半正定，$I_N \otimes W^\top W$ 半正定，Rayleigh 商非负，故 $S \ge 0$。由 Courant–Fischer 极大极小定理，
+因此 $S$ 是各空间奇异模态的能量按 $\sigma_r^2$ 加权后的平均值：某个流出剖面经邻域平均后保留得越多，它所在的模态对 $S$ 的贡献越大。
+
+这给出“有序性”解释的必要限定。若 $W$ 是对称且双随机的，$W$ 的特征值为 $\lambda_r$，上式中的权重是 $\lambda_r^2$。若再保证 $\lambda_r\ge0$（例如使用 lazy 矩阵），较平滑的低频模态通常有较大的权重，此时 $S$ 可作为平滑结构保留率。普通邻接平均矩阵可能有负特征值，$\lambda_r$ 和 $-\lambda_r$ 在 $S$ 中完全无法区分。例如偶数环上的交替模式满足 $W h=-h$，其 $S=1$，但它是最高频的棋盘格模式。因此“$S$ 越大就必然越有序”在一般 $W$ 下不成立；严格的结论只是“$W$ 的一步平滑对该流矩阵的能量保留得越多”。
+
+## 3.3 $S$ 的上下界【修订 R3】
+
+令 $\sigma_{\min}(W)$ 和 $\sigma_{\max}(W)$ 分别为最小和最大奇异值。对任意列向量 $h_j$，
 
 $$
-S \le \lambda_{\max}\!\big(I_N \otimes W^\top W\big) = \lambda_{\max}(W^\top W) = \sigma_{\max}^2(W),
+\sigma_{\min}^2(W)\|h_j\|_2^2
+\le \|Wh_j\|_2^2
+\le \sigma_{\max}^2(W)\|h_j\|_2^2 .
 $$
 
-其中用到 $\lambda_{\max}(I_N \otimes M) = \lambda_{\max}(M)$ 与 $\lambda_{\max}(W^\top W) = \sigma_{\max}^2(W)$。$\blacksquare$
-
-**推论 1。** 若 $W$ 双随机（例如正则图且权重对称化），则 $\sigma_{\max}(W) = 1$，故 $S \in [0,1]$。实际采用 Queen 邻接（仅行标准化、非列标准化），一般 $\sigma_{\max}(W) \ge 1$，故按一般情形 $0 \le S \le \sigma_{\max}^2(W)$ 表述。
-
-*说明。* 对任意行随机 $W$，因 $W\mathbf{1}=\mathbf{1}$ 有 $\|W\mathbf{1}\|_2 = \sqrt{N} = \|\mathbf{1}\|_2$，故 $\sigma_{\max}(W) \ge 1$；等号当且仅当 $\mathbf{1}$ 同时为 $W^\top$ 的（近似）主导特征向量，即双随机情形。
-
-**命题 2（C 的上下界）。**
+对 $j$ 求和并除以 $\|H\|_F^2$，得到
 
 $$
-|C| \le \sigma_{\max}(W).
+\boxed{\quad
+\sigma_{\min}^2(W)\le S\le\sigma_{\max}^2(W) .
+\quad}
 $$
 
-*证明。* 由 Cauchy–Schwarz 不等式与谱范数定义，
+原文的 $0\le S$ 是正确但通常不够紧的特例；只有当 $W$ 奇异时，$\sigma_{\min}(W)=0$，下界才是 $0$。
+
+这个区间作为“所有合法流矩阵”的区间是可达到的。设 $u$ 是 $W$ 的某个右奇异向量，取矩阵 $H$ 的第一列为 $u$、第二列为 $-u$、其余列为零，则 $\sum_{ij}H_{ij}=0$。对足够小的 $\varepsilon>0$，$F_n=U+\varepsilon H$ 非负且总和为 $1$，而 $S$ 不随 $\varepsilon$ 改变。选取对应 $\sigma_{\max}$ 或 $\sigma_{\min}$ 的 $u$ 即可达到两个端点（$N\ge2$）。
+
+行随机矩阵总有 $\sigma_{\max}(W)\ge1$，但不一定等于 $1$。确切地说，若 $W$ 非负且行随机，则
 
 $$
-|C| = \frac{1}{N}\big|z(p_{\text{in}})^\top W z(p_{\text{out}})\big|
-\le \frac{1}{N}\,\|z(p_{\text{in}})\|_2\,\|W z(p_{\text{out}})\|_2
-\le \frac{1}{N}\,\|z(p_{\text{in}})\|_2\,\sigma_{\max}(W)\,\|z(p_{\text{out}})\|_2 .
+\sigma_{\max}(W)^2\le \|W\|_1\|W\|_\infty
+ =\max_j\sum_iW_{ij},
 $$
 
-由 $\|z(p_{\text{in}})\|_2 = \|z(p_{\text{out}})\|_2 = \sqrt{N}$，得
+而双随机时 $\|W\|_1=\|W\|_\infty=1$，故 $S\in[0,1]$。仅行标准化的 Queen 矩阵一般不是双随机，$S$ 可以大于 $1$；这时它不能被称为普通意义上的“能量占比”。若希望对任意行随机 $W$ 都有 $[0,1]$ 的平滑率，可用其平稳分布 $\pi$ 定义
 
 $$
-|C| \le \frac{1}{N}\sqrt{N}\,\sigma_{\max}(W)\,\sqrt{N} = \sigma_{\max}(W). \qquad \blacksquare
+S_\pi=\frac{\sum_j\|Wh_j\|_{\pi}^2}{\sum_j\|h_j\|_{\pi}^2},
+\qquad \|x\|_\pi^2=\sum_i\pi_i x_i^2,
 $$
 
-**推论 2。** 若 $W$ 双随机，则 $|C| \le 1$，即 $C \in [-1,1]$。
+则由 Jensen 不等式和 $\pi^\top W=\pi^\top$ 得 $0\le S_\pi\le1$。
 
-## 3.4 完全随机情形的期望值
+## 3.4 $C$ 的确切含义和上下界【修订 R4】
 
-**命题 3（S 的零模型期望值）。** 在零假设（$F_c$ 各元素独立同分布、无空间结构）下，
-
-$$
-\mathbb{E}[S] = \frac{N\sum_{i=1}^N \frac{1}{k_i} - 1}{N^2 - 1} \;=\; \frac{1}{N}\sum_{i=1}^N \frac{1}{k_i} + O(N^{-2}).
-$$
-
-特别地，当图为 $k$-正则图（所有 $k_i = k$）时，
+令
 
 $$
-\mathbb{E}[S] \;\xrightarrow{N\to\infty}\; \frac{1}{k}.
+x=z(p_{\rm in}),\qquad y=z(p_{\rm out}),\qquad
+P=I_N-\frac1N\mathbf1\mathbf1^\top .
 $$
 
-*证明。* 记 $v = \text{vec}(F_c)$、$A = I_N \otimes W^\top W$，则 $S = \frac{v^\top A v}{v^\top v}$。中心化约束 $\sum_{ij}(F_c)_{ij}=0$ 使 $v$ 落在与 $\mathbf{1}_{N^2}$ 正交的 $d = N^2 - 1$ 维子空间 $V$ 上。在零假设下 $v$ 在该子空间内各向同性（方向均匀），利用单位球面上均匀向量 $u$ 的恒等式 $\mathbb{E}[uu^\top] = \frac{1}{d}P_V$（$P_V$ 为到 $V$ 的正交投影），得
+因为 $Px=x$、$Py=y$，所以
 
 $$
-\mathbb{E}[S] = \frac{\text{tr}(P_V A)}{N^2 - 1}.
+C=\frac{x^\top(PWP)y}{N} .
 $$
 
-记到 $\mathbf{1}_{N^2}$ 方向的投影 $P_\perp = \frac{1}{N^2}\mathbf{1}_{N^2}\mathbf{1}_{N^2}^\top$，则 $\text{tr}(P_V A) = \text{tr}(A) - \text{tr}(P_\perp A)$。因 $W$ 行随机，$W\mathbf{1}=\mathbf{1}$，故
+这说明 $C$ 只看 $W$ 在零均值子空间 $\mathbf1^\perp$ 上的作用。以下“精确范围”针对原定义给出的可行域 $F_n\ge0$、总和为 $1$，且没有另外禁止某些 OD 单元对。令
 
 $$
-\text{tr}(P_\perp A) = \frac{1}{N^2}\,\mathbf{1}_{N^2}^\top A\, \mathbf{1}_{N^2}
-= \frac{1}{N^2}\sum_{i=1}^{N} \mathbf{1}^\top W^\top W \mathbf{1}
-= \frac{1}{N^2}\cdot N\,\|W\mathbf{1}\|_2^2 = 1 .
+\rho_c=\left\|PWP\big|_{\mathbf1^\perp}\right\|_2
+       =\sigma_{\max}(PWP),
 $$
 
-另一方面，对行标准化权重矩阵 $W$，
+则 Cauchy--Schwarz 不等式给出更紧的界
 
 $$
-\text{tr}(W^\top W) = \sum_{i,j} W_{ij}^2 = \sum_{i=1}^N \sum_{j\in\mathcal{N}(i)} \frac{1}{k_i^2} = \sum_{i=1}^N k_i \cdot \frac{1}{k_i^2} = \sum_{i=1}^N \frac{1}{k_i},
+\boxed{\quad -\rho_c\le C\le\rho_c,\qquad
+\rho_c\le\sigma_{\max}(W).\quad}
 $$
 
-从而 $\text{tr}(A) = N\,\text{tr}(W^\top W) = N\sum_i \frac{1}{k_i}$。代入得
+原文的 $|C|\le\sigma_{\max}(W)$ 因而是正确的粗界，但不是考虑了 z-score 的零均值约束后的精确界。$\rho_c$ 是精确的：任取 $\mathbf1^\perp$ 中范数为 $\sqrt N$ 的左右奇异向量 $x,y$，取足够小的 $\varepsilon>0$ 使
 
 $$
-\mathbb{E}[S] = \frac{N\sum_i \frac{1}{k_i} - 1}{N^2 - 1},
+p_{\rm in}=\frac1N\mathbf1+\varepsilon x,\qquad
+p_{\rm out}=\frac1N\mathbf1+\varepsilon y
 $$
 
-其主项为 $\frac{1}{N}\sum_i \frac{1}{k_i}$，误差 $O(N^{-2})$。$k$-正则图时主项退化为 $\frac{1}{k}$。$\blacksquare$
+都非负，再令 $F_n=p_{\rm out}p_{\rm in}^\top$，即可实现相应的 $x,y$，从而达到 $\pm\rho_c$。
 
-**命题 4（C 的零模型期望值）。** 在零假设下，流入场与流出场彼此独立，故 $\mathbb{E}[z(p_{\text{in}})] = 0$ 与 $\mathbb{E}[z(p_{\text{out}})] = 0$，进而
+若 $W$ 双随机，则 $\mathbf1^\perp$ 在 $W$ 下不变，且 $\rho_c\le1$，所以 $C\in[-1,1]$。若 $W$ 还对称，则
 
 $$
-\mathbb{E}[C] = \frac{\mathbb{E}\big[z(p_{\text{in}})^\top W z(p_{\text{out}})\big]}{N} = 0 .
+\rho_c=\max_{r\ge2}|\lambda_r(W)| .
 $$
 
-*说明。* 该结果意味着：无空间结构时，S 并不趋于 0，而是趋于其几何期望 $\frac{1}{N}\sum_i \frac{1}{k_i}$（正则图 $1/k$）；C 则趋于 0。因此正文以 S 的偏离度（相对零模型）衡量结构失序、以 C 的正负衡量流入–流出耦合，均有明确的零模型基准。
+若图连通且非二分，普通对称随机游走通常有 $\rho_c<1$；二分图的负特征值可能使 $\rho_c=1$。仅行标准化时，$\rho_c$ 甚至可能大于 $1$。例如
 
-## 3.5 蒙特卡洛验证
+$$
+W=\begin{pmatrix}
+0&1/2&0&1/2\\
+1/2&0&1/2&0\\
+0&1&0&0\\
+1&0&0&0
+\end{pmatrix}
+$$
 
-图 S7 以蒙特卡洛模拟验证上述理论值。在环图（$k=2$，理论 $\mathbb{E}[S]\to 1/2$）上，随节点数 $N$ 增大，模拟 S 的均值（200 次独立随机流矩阵）逐步收敛到虚线所示的 $1/2$，与命题 3 一致；同时 C 的均值收敛到 0，与命题 4 一致，验证了零模型基准的正确性。
+对应一个无向但不规则的图，此时 $\|PWP\|_2\approx1.1441$，因此不能在“仅行标准化”的一般情形下宣称 $C\in[-1,1]$。
+
+逐项展开可见
+
+$$
+C=\frac1N\sum_i x_i\sum_jW_{ij}y_j .
+$$
+
+所以 $C>0$ 表示高流入单元倾向于邻接高流出单元，$C<0$ 表示相反。若 $W$ 不对称，交换入、出场会把 $W$ 换成 $W^\top$，数值一般不同；$C$ 是有方向的邻域交叉相关。还要注意，$C$ 只使用 $p_{\rm in}$ 和 $p_{\rm out}$ 两个边际场，不能识别具有相同边际的不同 OD 边结构，因而它不是单条 OD 边层面的依赖度量。
+
+## 3.5 零模型期望【修订 R5】
+
+### $S$ 的零模型
+
+“$F_c$ 的元素独立同分布”不能作为字面假设，因为 $\sum_{ij}F_{c,ij}=0$ 已使它们必然相关。一个足够且更准确的假设是：$v=\operatorname{vec}(F_c)$ 的方向分布在
+
+$$
+\mathcal V=\{v:\mathbf1_{N^2}^\top v=0\}
+$$
+
+内对全部 $N^2$ 个单元置换不变。例如，先生成独立同分布的单元流量，再归一化并减去 $U$，就具有这种交换对称性。假设 $\Pr(v=0)=0$，令 $u=v/\|v\|_2$。由置换对称性、$\mathbf1_{N^2}^\top u=0$ 和 $\|u\|_2=1$，有
+
+$$
+\mathbb E[uu^\top]=\frac1{N^2-1}P_{\mathcal V},
+$$
+
+其中 $P_{\mathcal V}=I-\mathbf1_{N^2}\mathbf1_{N^2}^\top/N^2$。一个直接验证是：置换对称性使 $\mathbb E[uu^\top]$ 的对角元素全相同、非对角元素全相同；再用 $\operatorname{tr}\mathbb E[uu^\top]=1$ 和 $\mathbb E[uu^\top]\mathbf1_{N^2}=0$ 即得上式。令
+
+$$
+A=I_N\otimes W^\top W,
+$$
+
+则 $S=u^\top A u$，故
+
+$$
+\mathbb E[S]=\frac{\operatorname{tr}(P_{\mathcal V}A)}{N^2-1} .
+$$
+
+现在
+
+$$
+\operatorname{tr}(A)=N\operatorname{tr}(W^\top W)
+ =N\sum_{i=1}^N\frac1{k_i},
+$$
+
+并且令 $q=\mathbf1_N\otimes\mathbf1_N$，由 $W\mathbf1=\mathbf1$ 得
+
+$$
+\frac{q^\top A q}{q^\top q}
+=\frac{N\|W\mathbf1\|_2^2}{N^2}=1 .
+$$
+
+因此
+
+$$
+\boxed{
+\mathbb E_0[S]=rac{N\displaystyle\sum_i1/k_i-1}{N^2-1} .
+}
+$$
+
+令 $\bar r=N^{-1}\sum_i1/k_i$，也可写成
+
+$$
+\mathbb E_0[S]=\bar r+\frac{\bar r-1}{N^2-1}
+=\bar r+O(N^{-2}).
+$$
+
+在 $k$-正则图上，有限 $N$ 的精确值为
+
+$$
+\mathbb E_0[S]=\frac{N^2/k-1}{N^2-1}\longrightarrow\frac1k .
+$$
+
+所以完全无空间结构时 $S$ 一般不趋于零；应将 $S$ 与这个零模型值或置换分布比较。
+
+### $C$ 的零模型
+
+原文中“流入、流出独立，因此各自期望为零”的逻辑不够严谨：z-score 的逐样本均值为零，并不自动推出每个坐标的期望为零；而从同一个 $F_n$ 得到的两个边际通常也不严格独立。
+
+一个适用于独立同分布 OD 单元流量的充分条件是：零模型在起点标签和终点标签的置换下分别不变。令
+
+$$
+m_{ij}=\mathbb E_0[x_i y_j].
+$$
+
+独立的行、列置换使所有 $m_{ij}$ 相同；另一方面 $\sum_i x_i=0$ 对每个样本都成立，所以 $\sum_i m_{ij}=0$，从而所有 $m_{ij}=0$。于是
+
+$$
+\boxed{\mathbb E_0[C]=0 .}
+$$
+
+若直接假设 $x$、$y$ 独立且至少一个均值为零，也能得到同一结论；但这是假设的一个更强版本。若零模型不具备上述交换对称性，则 $\mathbb E[C]=0$ 不能无条件推出，应通过保持行列边际的置换检验估计基准分布。
+
+## 3.6 对“有序性”和“耦合紧密性”的最终表述【修订 R6】
+
+在当前定义下，可以严格表述为：
+
+1. $S$ 衡量流出剖面经过一次地理邻域平均后保留的平方能量，且
+   $\sigma_{\min}^2(W)\le S\le\sigma_{\max}^2(W)$。只有当图算子谱的大小确实按“平滑程度”排序时，$S$ 才能单调代表空间有序性；一般 Queen 行标准化矩阵不满足这一点。
+2. $C$ 衡量标准化流入场与邻域标准化流出场的交叉相关，且精确范围为
+   $[-\|PWP\|_2,\|PWP\|_2]$。可用
+   $C^*=C/\|PWP\|_2$（当分母非零）得到几何上归一化的耦合强度。
+3. 实证报告中，建议同时报告 $S$、$\mathbb E_0[S]$（或置换 z-score）以及 $C$、$\|PWP\|_2$。这样不会把随机平滑造成的正基线误判为有序，也不会把非双随机矩阵下可能大于 $1$ 的 $C$ 误判为计算错误。
+
+若研究目标是一个保证在 $[0,1]$ 且严格随“平滑”变化的有序度，宜采用双随机、最好半正定（lazy）的空间算子，或直接使用图拉普拉斯能量；现有 $S$ 在一般行标准化 Queen 矩阵下只能解释为一步平滑保留率。
+
+## 3.7 蒙特卡洛验证【修订 R7】
+
+在环图上 $k=2$，零模型下 $S$ 的有限 $N$ 理论均值为
+
+$$
+\mathbb E_0[S]=\frac{N^2/2-1}{N^2-1},
+$$
+
+它随 $N$ 增大趋于 $1/2$。模拟时应为每个 OD 单元生成独立同分布的非负随机权重，归一化后计算 $F_c$、$S$ 和 $C$；这种生成方式满足 §3.5 的交换对称性。随着重复次数增加，$S$ 的样本均值应收敛到上述有限 $N$ 基线，$C$ 的样本均值应收敛到 $0$。比较有限 $N$ 公式而非直接比较 $1/2$，可以避免把有限规模误差误判为推导误差。
